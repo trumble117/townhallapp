@@ -2,7 +2,8 @@
 let config = {
     sheetUrl: '',
     pollInterval: 30,
-    qrUrl: ''
+    qrUrl: '',
+    title: ''
 };
 
 // Done questions
@@ -21,6 +22,10 @@ function loadConfig() {
     document.getElementById('sheet-url').value = config.sheetUrl;
     document.getElementById('poll-interval').value = config.pollInterval;
     document.getElementById('qr-url').value = config.qrUrl;
+    const headerTitle = document.querySelector('header h1');
+    const titleInput = document.getElementById('app-title');
+    if (titleInput) titleInput.value = config.title || headerTitle?.textContent || '';
+    if (config.title && headerTitle) headerTitle.textContent = config.title;
 }
 
 // Save config to localStorage
@@ -34,11 +39,17 @@ function saveConfig() {
     config.sheetUrl = url;
     config.pollInterval = parseInt(document.getElementById('poll-interval').value);
     config.qrUrl = document.getElementById('qr-url').value;
+    const newTitle = (document.getElementById('app-title')?.value || '').trim();
+    if (newTitle) {
+        config.title = newTitle;
+        const headerTitle = document.querySelector('header h1');
+        if (headerTitle) headerTitle.textContent = newTitle;
+    }
     localStorage.setItem('townHallConfig', JSON.stringify(config));
     console.log('Config saved:', config);
+    updateQRCode();
     hideConfigModal();
     startPolling();
-    updateQRCode();
 }
 
 // Questions data
@@ -159,25 +170,102 @@ function displayQuestions() {
 
 // Show expanded question
 function showExpandedQuestion(index) {
-    const q = questions[index];
-    document.getElementById('submitter-name').textContent = "--" + q.name;
-    document.getElementById('full-question').textContent = '"' + q.question + '"';
+    updateExpandedFields(index);
     currentActiveIndex = activeIndices.indexOf(index);
     updateNavButtons();
-    document.getElementById('expanded-question').style.display = 'flex';
+    const overlay = document.getElementById('expanded-question');
+    overlay.classList.add('open');
 }
 
 // Update navigation buttons
 function updateNavButtons() {
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
-    prevBtn.disabled = currentActiveIndex <= 0;
-    nextBtn.disabled = currentActiveIndex >= activeIndices.length - 1;
+    const single = activeIndices.length <= 1;
+    if (prevBtn) prevBtn.disabled = single;
+    if (nextBtn) nextBtn.disabled = single;
+}
+
+// Sliding transition helpers
+function updateExpandedFields(index) {
+    const q = questions[index];
+    const nameEl = document.getElementById('submitter-name');
+    const questionEl = document.getElementById('full-question');
+    if (nameEl) nameEl.textContent = "--" + q.name;
+    if (questionEl) questionEl.textContent = '"' + q.question + '"';
+}
+
+function slideToIndex(targetAbsIndex, direction) {
+    const block = document.querySelector('#expanded-content blockquote');
+    if (!block) {
+        // Fallback if element not found
+        updateExpandedFields(targetAbsIndex);
+        return;
+    }
+
+    // Determine outgoing animation class
+    const outClass = direction === 'left' ? 'slide-out-right' : 'slide-out-left';
+    const inClass = direction === 'left' ? 'slide-in-left' : 'slide-in-right';
+
+    // Remove any residual classes
+    block.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right');
+
+    // Animate current content out
+    block.classList.add(outClass);
+
+    const handleOutEnd = () => {
+        block.removeEventListener('animationend', handleOutEnd);
+        // Update to new content
+        updateExpandedFields(targetAbsIndex);
+        // Animate new content in
+        block.classList.remove(outClass);
+        block.classList.add(inClass);
+
+        const handleInEnd = () => {
+            block.classList.remove(inClass);
+            block.removeEventListener('animationend', handleInEnd);
+        };
+        block.addEventListener('animationend', handleInEnd, { once: true });
+    };
+
+    block.addEventListener('animationend', handleOutEnd, { once: true });
+}
+
+// Navigation helpers with wrap-around cycling
+function goPrev() {
+    if (!activeIndices.length) return;
+    const overlayOpen = document.getElementById('expanded-question')?.classList.contains('open');
+    // Compute next active index (wrap-around)
+    let nextActiveIdx = currentActiveIndex <= 0 ? activeIndices.length - 1 : currentActiveIndex - 1;
+    const targetAbsIndex = activeIndices[nextActiveIdx];
+
+    if (overlayOpen) {
+        slideToIndex(targetAbsIndex, 'left');
+        currentActiveIndex = nextActiveIdx;
+    } else {
+        showExpandedQuestion(targetAbsIndex);
+    }
+}
+
+function goNext() {
+    if (!activeIndices.length) return;
+    const overlayOpen = document.getElementById('expanded-question')?.classList.contains('open');
+    // Compute next active index (wrap-around)
+    let nextActiveIdx = currentActiveIndex >= activeIndices.length - 1 ? 0 : currentActiveIndex + 1;
+    const targetAbsIndex = activeIndices[nextActiveIdx];
+
+    if (overlayOpen) {
+        slideToIndex(targetAbsIndex, 'right');
+        currentActiveIndex = nextActiveIdx;
+    } else {
+        showExpandedQuestion(targetAbsIndex);
+    }
 }
 
 // Hide expanded question
 function hideExpandedQuestion() {
-    document.getElementById('expanded-question').style.display = 'none';
+    const overlay = document.getElementById('expanded-question');
+    overlay.classList.remove('open');
 }
 
 // Mark question as done
@@ -241,7 +329,7 @@ function updateQRCode() {
 // Event listeners
 window.addEventListener('DOMContentLoaded', () => {
     // Initially hide modals
-    document.getElementById('expanded-question').style.display = 'none';
+    document.getElementById('expanded-question').classList.remove('open');
     document.getElementById('config-modal').style.display = 'none';
 
     document.getElementById('config-btn').addEventListener('click', showConfigModal);
@@ -251,13 +339,25 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('close-btn').addEventListener('click', hideExpandedQuestion);
     document.getElementById('mark-done-btn').addEventListener('click', markAsDone);
     document.getElementById('prev-btn').addEventListener('click', () => {
-        if (currentActiveIndex > 0) {
-            showExpandedQuestion(activeIndices[--currentActiveIndex]);
-        }
+        goPrev();
     });
     document.getElementById('next-btn').addEventListener('click', () => {
-        if (currentActiveIndex < activeIndices.length - 1) {
-            showExpandedQuestion(activeIndices[++currentActiveIndex]);
+        goNext();
+    });
+
+    // Keyboard shortcuts: Esc closes modal, arrows cycle questions
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideExpandedQuestion();
+        } else if (e.key === 'ArrowLeft') {
+            // Only cycle when expanded view is open
+            if (document.getElementById('expanded-question').classList.contains('open')) {
+                goPrev();
+            }
+        } else if (e.key === 'ArrowRight') {
+            if (document.getElementById('expanded-question').classList.contains('open')) {
+                goNext();
+            }
         }
     });
 
