@@ -428,7 +428,7 @@ header h1 {
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    z-index: 100;
+    z-index: 2001; /* Above overlay (1000) */
 }
 
 #qr-code img {
