@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Town Hall Question Display</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Margs With the Mayors - 11/24/2025</h1>
+            <button id="config-btn">⚙️ Settings</button>
+        </header>
+        <div id="questions-container"></div>
+        <div id="expanded-question">
+            <button id="prev-btn"><</button>
+            <button id="next-btn">></button>
+            <div id="expanded-content">
+                <blockquote>
+                    <p id="full-question"></p>
+                    <cite id="submitter-name"></cite>
+                </blockquote>
+                <button id="mark-done-btn">Mark as Done</button>
+                <button id="close-btn">Close</button>
+            </div>
+        </div>
+        <div id="config-modal">
+            <div id="config-content">
+                <h2>Configuration</h2>
+                <label for="sheet-url">Google Sheets CSV URL:</label>
+                <input type="text" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/.../export?format=csv">
+                <label for="poll-interval">Poll Interval (seconds):</label>
+                <input type="number" id="poll-interval" min="5" value="30">
+                <button id="save-config">Save</button>
+                <button id="cancel-config">Cancel</button>
+                <button id="clear-done">Clear All Marked Done</button>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

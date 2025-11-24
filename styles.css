@@ -1,0 +1,316 @@
+/* Modern styling with custom color palette */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #335765 0%, #74A8A4 100%);
+    color: #333;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+header {
+    background: rgba(219, 226, 220, 0.9);
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    margin: 0;
+    color: #7F543D;
+}
+
+#config-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #7F543D;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+#config-btn:hover {
+    background: #6a4733;
+}
+
+#questions-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.question-box {
+    background: rgba(182, 217, 224, 0.95);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    min-height: 100px;
+    max-height: 150px;
+    overflow: hidden;
+}
+
+.question-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.question-preview {
+    font-size: 16px;
+    line-height: 1.4;
+    color: #333;
+}
+
+.submitter {
+    font-weight: bold;
+    color: #335765;
+    margin-bottom: 10px;
+}
+
+#expanded-question {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#prev-btn, #next-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 48px;
+    cursor: pointer;
+    padding: 20px;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#prev-btn {
+    left: 20px;
+}
+
+#next-btn {
+    right: 20px;
+}
+
+#nav-buttons {
+    display: none;
+}
+
+#expanded-content {
+    background: #DBE2DC;
+    border-radius: 15px;
+    padding: 40px;
+    max-width: 90vw;
+    /* width: 600px; */
+    max-height: 80vh;
+    overflow-y: auto;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+#expanded-content h2 {
+    color: #7F543D;
+    margin-bottom: 20px;
+}
+
+#expanded-content p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #333;
+}
+
+#expanded-content blockquote {
+    text-align: left;
+    margin: 0;
+    font-size: 28px;
+    font-style: italic;
+    font-weight: bold;
+    line-height: 1.4;
+}
+
+#expanded-content blockquote p {
+    white-space: pre-line;
+    word-wrap: break-word;
+}
+
+#expanded-content cite {
+    font-size: 20px;
+    font-style: normal;
+    font-weight: normal;
+    color: #666;
+    display: block;
+    text-align: right;
+    margin-top: 15px;
+}
+
+#nav-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+#prev-btn, #next-btn {
+    background: #7F543D;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+#prev-btn:hover, #next-btn:hover {
+    background: #6a4733;
+}
+
+#prev-btn:disabled, #next-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+#mark-done-btn {
+    background: #335765;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    margin-right: 10px;
+    transition: background 0.3s;
+}
+
+#mark-done-btn:hover {
+    background: #74A8A4;
+}
+
+#close-btn {
+    background: #7F543D;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    transition: background 0.3s;
+}
+
+#close-btn:hover {
+    background: #6a4733;
+}
+
+
+
+#config-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+#config-content {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+#config-content h2 {
+    color: #7F543D;
+    margin-bottom: 20px;
+}
+
+#config-content label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+#config-content input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+#config-content button {
+    margin-top: 20px;
+    margin-left: 10px;
+    background: #7F543D;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+#config-content button:hover {
+    background: #6a4733;
+}
+
+#cancel-config {
+    background: #ccc;
+    color: #333;
+}
+
+#cancel-config:hover {
+    background: #bbb;
+}
+
+#clear-done {
+    background: #dc3545;
+    color: white;
+}
+
+#clear-done:hover {
+    background: #c82333;
+}
