@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  townhall-app:
+    build: .
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - NGINX_PORT=80

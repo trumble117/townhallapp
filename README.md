@@ -29,7 +29,7 @@ A lightweight web application for displaying audience questions from a Google Sh
 
 ## Configuration
 
-1. Open `index.html` in your web browser.
+1. Access the application in your web browser.
 2. Click the settings button (⚙️) in the top-right corner.
 3. Enter the Google Sheets CSV URL in the "Google Sheets CSV URL" field.
 4. Set the desired poll interval in seconds (minimum 5 seconds).
@@ -66,7 +66,7 @@ Since this is a static web application, you can deploy it in several ways:
 ### Local Deployment
 
 1. Place the files (`index.html`, `styles.css`, `app.js`) in a folder on your laptop.
-2. Open `index.html` directly in your web browser.
+2. Serve the files using a local web server (see "Running the App" section above).
 
 ### Web Server Deployment
 
