@@ -32,11 +32,16 @@
                 <input type="text" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/.../export?format=csv">
                 <label for="poll-interval">Poll Interval (seconds):</label>
                 <input type="number" id="poll-interval" min="5" value="30">
+                <label for="qr-url">Question Submission URL:</label>
+                <input type="text" id="qr-url" placeholder="https://forms.google.com/...">
                 <button id="save-config">Save</button>
                 <button id="cancel-config">Cancel</button>
                 <button id="clear-done">Clear All Marked Done</button>
             </div>
         </div>
+    <div id="qr-code" class="qr-hidden">
+        <img id="qr-image" alt="Scan to submit a question">
+    </div>
     </div>
     <script src="app.js"></script>
 </body>

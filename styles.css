@@ -314,3 +314,24 @@ header h1 {
 #clear-done:hover {
     background: #c82333;
 }
+
+#qr-code {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+}
+
+#qr-code img {
+    width: 120px;
+    height: 120px;
+    display: block;
+}
+
+.qr-hidden {
+    display: none;
+}

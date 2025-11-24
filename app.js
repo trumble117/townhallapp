@@ -1,7 +1,8 @@
 // Configuration
 let config = {
     sheetUrl: '',
-    pollInterval: 30
+    pollInterval: 30,
+    qrUrl: ''
 };
 
 // Done questions
@@ -19,6 +20,7 @@ function loadConfig() {
     }
     document.getElementById('sheet-url').value = config.sheetUrl;
     document.getElementById('poll-interval').value = config.pollInterval;
+    document.getElementById('qr-url').value = config.qrUrl;
 }
 
 // Save config to localStorage
@@ -31,10 +33,12 @@ function saveConfig() {
     }
     config.sheetUrl = url;
     config.pollInterval = parseInt(document.getElementById('poll-interval').value);
+    config.qrUrl = document.getElementById('qr-url').value;
     localStorage.setItem('townHallConfig', JSON.stringify(config));
     console.log('Config saved:', config);
     hideConfigModal();
     startPolling();
+    updateQRCode();
 }
 
 // Questions data
@@ -214,6 +218,26 @@ function startPolling() {
     pollTimer = setInterval(fetchQuestions, config.pollInterval * 1000);
 }
 
+// Update QR code display
+function updateQRCode() {
+    const qrContainer = document.getElementById('qr-code');
+    const qrImage = document.getElementById('qr-image');
+
+    // Safeguard if elements are not yet in the DOM
+    if (!qrContainer || !qrImage) {
+        return;
+    }
+
+    const url = (config.qrUrl || '').trim();
+    if (url) {
+        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(url)}`;
+        qrContainer.classList.remove('qr-hidden');
+    } else {
+        qrContainer.classList.add('qr-hidden');
+        qrImage.removeAttribute('src');
+    }
+}
+
 // Event listeners
 window.addEventListener('DOMContentLoaded', () => {
     // Initially hide modals
@@ -239,6 +263,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Initialize
     loadConfig();
+    updateQRCode();
     if (config.sheetUrl) {
         startPolling();
     }
