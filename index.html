@@ -28,14 +28,21 @@
         <div id="config-modal">
             <div id="config-content">
                 <h2>Configuration</h2>
-                <label for="app-title">App Title:</label>
+                <p style="margin: 6px 0 14px; font-size: 13px; color: #555;">
+                    Need help? <a href="help.html" target="_blank" rel="noopener">Read the setup guide</a>.
+                </p>
+                <label for="app-title" title="The title shown at the top of the app.">App Title:</label>
                 <input type="text" id="app-title" placeholder="Town Hall Questions">
-                <label for="sheet-url">Google Sheets CSV URL:</label>
-                <input type="text" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/.../export?format=csv">
-                <label for="poll-interval">Poll Interval (seconds):</label>
-                <input type="number" id="poll-interval" min="5" value="30">
-                <label for="qr-url">Question Submission URL:</label>
-                <input type="text" id="qr-url" placeholder="https://forms.google.com/...">
+                <label for="sheet-url" title="Paste the public CSV export URL of your Google Sheet.">Google Sheets CSV URL:</label>
+                <input type="text" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/.../export?format=csv" title="Example: https://docs.google.com/spreadsheets/d/XXX/export?format=csv">
+               
+                <label for="name-column" title="Select the column in your CSV that contains submitter names.">Name column:</label>
+                <select id="name-column" title="Choose the header for submitter names."></select>
+                <label for="question-column" title="Select the column in your CSV that contains question text.">Question column:</label>
+                <select id="question-column" title="Choose the header for question text."></select>
+                <small style="display:block; color:#666; margin:6px 0 10px;">After you paste the CSV URL, the headers will auto-load and appear in the dropdowns above.</small>
+                <label for="qr-url" title="Paste the public link to your Google Form that attendees will fill out. The QR code points to this URL.">Question Submission URL:</label>
+                <input type="text" id="qr-url" placeholder="https://forms.google.com/..." title="Public Google Form URL for submitting questions. The QR code uses this link.">
                 <button id="save-config">Save</button>
                 <button id="cancel-config">Cancel</button>
                 <button id="clear-done">Clear All Marked Done</button>

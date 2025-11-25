@@ -3,7 +3,9 @@ let config = {
     sheetUrl: '',
     pollInterval: 30,
     qrUrl: '',
-    title: ''
+    title: '',
+    nameColumn: '',
+    questionColumn: ''
 };
 
 // Done questions
@@ -19,26 +21,48 @@ function loadConfig() {
     if (done) {
         doneQuestions = JSON.parse(done);
     }
-    document.getElementById('sheet-url').value = config.sheetUrl;
-    document.getElementById('poll-interval').value = config.pollInterval;
-    document.getElementById('qr-url').value = config.qrUrl;
+    const sheetEl = document.getElementById('sheet-url');
+    if (sheetEl) sheetEl.value = config.sheetUrl || '';
+
+    const pollElInit = document.getElementById('poll-interval');
+    if (pollElInit) pollElInit.value = String(config.pollInterval || 30);
+
+    const qrElInit = document.getElementById('qr-url');
+    if (qrElInit) qrElInit.value = config.qrUrl || '';
+
+    const nameSel = document.getElementById('name-column');
+    const questionSel = document.getElementById('question-column');
+    if (nameSel && config.nameColumn) nameSel.value = config.nameColumn;
+    if (questionSel && config.questionColumn) questionSel.value = config.questionColumn;
+
     const headerTitle = document.querySelector('header h1');
     const titleInput = document.getElementById('app-title');
-    if (titleInput) titleInput.value = config.title || headerTitle?.textContent || '';
+    if (titleInput) titleInput.value = config.title || (headerTitle ? headerTitle.textContent : '') || '';
     if (config.title && headerTitle) headerTitle.textContent = config.title;
 }
 
 // Save config to localStorage
 function saveConfig() {
-    let url = document.getElementById('sheet-url').value;
+    let url = (document.getElementById('sheet-url')?.value || '').trim();
     // Auto-convert shareable link to CSV export URL
     if (url.includes('/edit?usp=sharing')) {
         url = url.replace('/edit?usp=sharing', '/export?format=csv');
         document.getElementById('sheet-url').value = url;
     }
+    const pollEl = document.getElementById('poll-interval');
+    const qrEl = document.getElementById('qr-url');
     config.sheetUrl = url;
-    config.pollInterval = parseInt(document.getElementById('poll-interval').value);
-    config.qrUrl = document.getElementById('qr-url').value;
+    config.pollInterval = Math.max(
+        5,
+        parseInt(pollEl && pollEl.value ? pollEl.value : (config.pollInterval || 30)) || 30
+    );
+    config.qrUrl = qrEl && typeof qrEl.value === 'string' ? qrEl.value : '';
+    // Save selected columns if present
+    const nameSelSave = document.getElementById('name-column');
+    const questionSelSave = document.getElementById('question-column');
+    if (nameSelSave && nameSelSave.value) config.nameColumn = nameSelSave.value;
+    if (questionSelSave && questionSelSave.value) config.questionColumn = questionSelSave.value;
+
     const newTitle = (document.getElementById('app-title')?.value || '').trim();
     if (newTitle) {
         config.title = newTitle;
@@ -134,14 +158,44 @@ function parseCSV(csvText) {
     }
 
     questions = [];
+    if (!rows.length) return;
+
+    // Determine header mapping
+    const header = rows[0].map(h => h.replace(/^"|"$/g, ''));
+    const headerLower = header.map(h => h.trim().toLowerCase());
+
+    let nameIdx = -1;
+    let questionIdx = -1;
+
+    // If configuration specifies explicit columns, use them
+    if (config.nameColumn) {
+        nameIdx = header.indexOf(config.nameColumn);
+    }
+    if (config.questionColumn) {
+        questionIdx = header.indexOf(config.questionColumn);
+    }
+
+    // Fallback: try to guess columns by common names
+    if (nameIdx === -1) {
+        nameIdx = headerLower.findIndex(h => h === 'name' || h.includes('name') || h.includes('submitter'));
+    }
+    if (questionIdx === -1) {
+        questionIdx = headerLower.findIndex(h => h === 'question' || h.includes('question') || h.includes('ask'));
+    }
+
+    // Last fallback: default to second and third column if available
+    if (nameIdx === -1 && header.length > 1) nameIdx = 1;
+    if (questionIdx === -1 && header.length > 2) questionIdx = 2;
+
     for (let r = 1; r < rows.length; r++) { // skip header
         const row = rows[r];
-        if (row && row.length >= 3) {
-            const name = row[1].replace(/^"|"$/g, '');
-            const question = row[2].replace(/^"|"$/g, '');
-            if (name && question) {
-                questions.push({ name: name, question: question });
-            }
+        if (!row || row.length === 0) continue;
+        const rawName = nameIdx >= 0 && nameIdx < row.length ? row[nameIdx] : '';
+        const rawQuestion = questionIdx >= 0 && questionIdx < row.length ? row[questionIdx] : '';
+        const name = (rawName || '').replace(/^"|"$/g, '').trim();
+        const question = (rawQuestion || '').replace(/^"|"$/g, '').trim();
+        if (name && question) {
+            questions.push({ name, question });
         }
     }
 }
@@ -288,7 +342,10 @@ function clearDone() {
 
 // Config modal
 function showConfigModal() {
-    document.getElementById('config-modal').style.display = 'flex';
+    const modal = document.getElementById('config-modal');
+    if (modal) modal.style.display = 'flex';
+    // Populate header-based mapping whenever the modal opens
+    fetchHeadersAndPopulate();
 }
 
 function hideConfigModal() {
@@ -304,6 +361,64 @@ function startPolling() {
     clearInterval(pollTimer);
     fetchQuestions();
     pollTimer = setInterval(fetchQuestions, config.pollInterval * 1000);
+}
+
+/**
+ * Fetch headers from the CSV URL and populate the mapping selects.
+ * Auto-select likely defaults (Name/Question) if found.
+ */
+async function fetchHeadersAndPopulate() {
+    const url = (document.getElementById('sheet-url')?.value || '').trim();
+    const nameSel = document.getElementById('name-column');
+    const questionSel = document.getElementById('question-column');
+    if (!url || !nameSel || !questionSel) return;
+
+    try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to fetch CSV for headers');
+        const text = await res.text();
+        // Get first line
+        const firstNewline = text.indexOf('\n');
+        const headerLine = firstNewline >= 0 ? text.slice(0, firstNewline) : text;
+        const headers = parseCSVLine(headerLine).map(h => h.replace(/^"|"$/g, ''));
+
+        // Populate selects
+        nameSel.innerHTML = '';
+        questionSel.innerHTML = '';
+        headers.forEach(h => {
+            const opt1 = document.createElement('option');
+            opt1.value = h;
+            opt1.textContent = h;
+            nameSel.appendChild(opt1);
+
+            const opt2 = document.createElement('option');
+            opt2.value = h;
+            opt2.textContent = h;
+            questionSel.appendChild(opt2);
+        });
+
+        // Try to auto-select reasonable defaults
+        const lower = headers.map(h => h.trim().toLowerCase());
+        const guessName =
+            lower.findIndex(h => h === 'name' || h.includes('name') || h.includes('submitter'));
+        const guessQuestion =
+            lower.findIndex(h => h === 'question' || h.includes('question') || h.includes('ask'));
+
+        if (config.nameColumn && headers.includes(config.nameColumn)) {
+            nameSel.value = config.nameColumn;
+        } else if (guessName >= 0) {
+            nameSel.value = headers[guessName];
+        }
+
+        if (config.questionColumn && headers.includes(config.questionColumn)) {
+            questionSel.value = config.questionColumn;
+        } else if (guessQuestion >= 0) {
+            questionSel.value = headers[guessQuestion];
+        }
+    } catch (e) {
+        console.error('Failed to load headers:', e);
+        // Leave selects untouched if fetch fails
+    }
 }
 
 // Update QR code display
@@ -334,6 +449,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('config-btn').addEventListener('click', showConfigModal);
     document.getElementById('save-config').addEventListener('click', saveConfig);
+    // When the sheet URL changes or loses focus, try to load headers
+    const sheetUrlInput = document.getElementById('sheet-url');
+    if (sheetUrlInput) {
+        sheetUrlInput.addEventListener('change', fetchHeadersAndPopulate);
+        sheetUrlInput.addEventListener('blur', fetchHeadersAndPopulate);
+    }
     document.getElementById('cancel-config').addEventListener('click', hideConfigModal);
     document.getElementById('clear-done').addEventListener('click', clearDone);
     document.getElementById('close-btn').addEventListener('click', hideExpandedQuestion);
@@ -363,8 +484,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Initialize
     loadConfig();
-    updateQRCode();
     if (config.sheetUrl) {
+        fetchHeadersAndPopulate();
         startPolling();
     }
+    updateQRCode();
 });

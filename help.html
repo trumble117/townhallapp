@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Town Hall App - Setup Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --accent: #7f543d;
+        --muted: #555;
+        --bg: #f7f7f7;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+          sans-serif;
+        margin: 0;
+        background: #fff;
+        color: #222;
+      }
+      header {
+        background: #dbe2dc;
+        padding: 24px;
+      }
+      header h1 {
+        margin: 0;
+        color: var(--accent);
+      }
+      main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      h2 {
+        color: var(--accent);
+        margin-top: 28px;
+      }
+      ol,
+      ul {
+        line-height: 1.6;
+      }
+      code,
+      pre {
+        background: #f3f3f3;
+        border: 1px solid #e6e6e6;
+        border-radius: 6px;
+        padding: 2px 6px;
+      }
+      pre {
+        padding: 10px;
+        overflow: auto;
+      }
+      .tip {
+        background: #f8f6f3;
+        border-left: 4px solid var(--accent);
+        padding: 12px 14px;
+        margin: 16px 0;
+        color: var(--muted);
+      }
+      .kbd {
+        border: 1px solid #ccc;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: #fafafa;
+      }
+      a {
+        color: var(--accent);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 18px;
+      }
+      .card {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Town Hall Questions - Setup Guide</h1>
+      <p>
+        This guide walks you through configuring data, mapping columns, and
+        deploying the app.
+      </p>
+    </header>
+    <main>
+      <section class="card">
+        <h2>1) Set up your Google Form</h2>
+        <ol>
+          <li>
+            Create a <strong>Google Form</strong> for attendees to submit
+            questions. Include fields such as <em>Name</em> and
+            <em>Question</em>.
+          </li>
+          <li>
+            Open the Form’s <strong>Responses</strong> tab and click the
+            <strong>Sheets</strong> icon to create/link a response
+            <strong>Google Sheet</strong>.
+          </li>
+          <li>
+            Open the Form’s <strong>Send</strong> dialog and copy the
+            <strong>public Form link</strong>. This is what attendees use; paste
+            it into the app’s “Question Submission URL” so the QR code points to
+            it.
+          </li>
+        </ol>
+        <div class="tip">
+          Submissions from the Form will automatically populate the linked
+          Google Sheet. You’ll read questions from that Sheet via its CSV export
+          link.
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2) Link to the Sheet and get a CSV URL</h2>
+        <ol>
+          <li>
+            Open the linked <strong>Google Sheet</strong> created by your Form.
+          </li>
+          <li>
+            Ensure the first row contains <strong>headers</strong> (for example
+            <code>Name</code>, <code>Question</code>). The app uses headers to
+            map columns.
+          </li>
+          <li>
+            Click <strong>Share</strong> and set “Anyone with the link can
+            view.”
+          </li>
+          <li>
+            Get the <strong>CSV export URL</strong>:
+            <ul>
+              <li>
+                Copy the Sheet URL (it often ends with <code>/edit</code>).
+              </li>
+              <li>Change the ending to <code>/export?format=csv</code>.</li>
+              <li>
+                Example:
+                <code
+                  >https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv</code
+                >
+              </li>
+            </ul>
+          </li>
+        </ol>
+        <div class="tip">
+          If questions include commas or line breaks, Google handles quoting
+          automatically. The app’s parser supports multi‑line, quoted CSV
+          fields.
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3) Configure the app</h2>
+        <ol>
+          <li>
+            Open the app and click the
+            <span class="kbd">⚙️ Settings</span> button.
+          </li>
+          <li>
+            (Optional) Set the <strong>App Title</strong> shown in the header.
+          </li>
+          <li>
+            Paste your <strong>Google Sheets CSV URL</strong> (from the
+            form-linked Sheet). When you tab out/blur, the app fetches the
+            header row and shows column choices.
+          </li>
+          <li>
+            Select the <strong>Name column</strong> and the
+            <strong>Question column</strong> from the dropdowns.
+          </li>
+          <li>
+            Paste your public <strong>Google Form URL</strong> into
+            <strong>Question Submission URL</strong>. A QR code appears
+            bottom-right for attendees to scan.
+          </li>
+          <li>
+            Click <span class="kbd">Save</span>. The app persists your settings
+            and begins polling automatically.
+          </li>
+        </ol>
+        <div class="grid">
+          <div>
+            <h3>Tooltips</h3>
+            <ul>
+              <li>Hover labels for quick help.</li>
+              <li>CSV URL input includes an example link format.</li>
+              <li>Column selects describe what they map to.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Keyboard and Navigation</h3>
+            <ul>
+              <li>
+                <span class="kbd">Esc</span> closes the expanded question view
+              </li>
+              <li>
+                <span class="kbd">←</span> and <span class="kbd">→</span> cycle
+                through questions (with directional slide animations)
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4) Deployment options</h2>
+        <h3>Local server</h3>
+        <ul>
+          <li>
+            Python: <code>python -m http.server 8000</code> then open
+            <code>http://localhost:8000</code>
+          </li>
+          <li>
+            Node http-server: <code>http-server</code> then open the printed URL
+          </li>
+        </ul>
+
+        <h3>Docker (recommended)</h3>
+        <pre><code># Build and run
+docker-compose up --build -d
+
+# or manual:
+docker build -t townhall-app .
+docker run -d -p 8080:80 --name townhall-app townhall-app</code></pre>
+
+        <h3>Serverless/container platforms</h3>
+        <ul>
+          <li>AWS Fargate (ECS)</li>
+          <li>Google Cloud Run</li>
+          <li>Azure Container Instances</li>
+        </ul>
+        <p>
+          See <code>serverless.md</code> in the repository for step-by-step
+          commands.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>5) Troubleshooting</h2>
+        <ul>
+          <li>
+            <strong>No questions appearing:</strong> Check the CSV URL and that
+            the sheet is shared publicly.
+          </li>
+          <li>
+            <strong>Wrong columns:</strong> Use the mapping dropdowns to choose
+            the correct header for Name and Question.
+          </li>
+          <li>
+            <strong>QR not showing:</strong> Ensure the Question Submission URL
+            is set; the QR is hidden when empty.
+          </li>
+          <li>
+            <strong>CORS error:</strong> Always serve via a web server or
+            container; opening <code>index.html</code> directly won’t work.
+          </li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

@@ -132,6 +132,7 @@ header h1 {
     padding: 20px;
     border-radius: 50%;
     transition: background 0.3s;
+    z-index: 1001;
 }
 
 #prev-btn:hover, #next-btn:hover {
@@ -154,7 +155,7 @@ header h1 {
     background: #DBE2DC;
     border-radius: 15px;
     padding: 40px;
-    max-width: 90vw;
+    max-width: 80vw;
     /* width: 600px; */
     max-height: 80vh;
     overflow-y: auto;
@@ -351,7 +352,7 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1001;
+    z-index: 1002;
 }
 
 #config-content {
@@ -432,8 +433,8 @@ header h1 {
 }
 
 #qr-code img {
-    width: 120px;
-    height: 120px;
+    width: 8vw;
+    height: 8vw;
     display: block;
 }
 
