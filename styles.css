@@ -20,11 +20,17 @@ header {
     padding: 20px;
     text-align: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative; /* allow absolutely positioned Settings button while reserving space */
 }
 
 header h1 {
     margin: 0;
     color: #7F543D;
+    /* Reserve space on the right for the Settings button and allow long titles to wrap */
+    padding-right: clamp(120px, 22vw, 200px);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.2;
 }
 
 #config-btn {
@@ -352,7 +358,7 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1002;
+    z-index: 2002;
 }
 
 #config-content {
@@ -363,6 +369,12 @@ header h1 {
     width: 90%;
     text-align: center;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure inputs/selects account for padding/border in width calculations */
+#config-content,
+#config-content * {
+    box-sizing: border-box;
 }
 
 #config-content h2 {
@@ -386,6 +398,14 @@ header h1 {
     font-size: 16px;
 }
 
+#config-content select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
 #config-content button {
     margin-top: 20px;
     margin-left: 10px;
@@ -401,6 +421,17 @@ header h1 {
 
 #config-content button:hover {
     background: #6a4733;
+}
+
+/* Group action buttons */
+.config-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+.config-actions button {
+    margin-left: 0; /* override default button left margin for grouped buttons */
 }
 
 #cancel-config {
@@ -434,10 +465,67 @@ header h1 {
 
 #qr-code img {
     width: 8vw;
+    min-width: 120px;
     height: 8vw;
+    min-height: 120px;
     display: block;
 }
 
 .qr-hidden {
     display: none;
+}
+
+/* Desktop layout: switch config modal to CSS Grid for robust alignment */
+@media (min-width: 700px) {
+    #config-content {
+        max-width: 720px;
+        text-align: left;
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        column-gap: 12px;
+        row-gap: 12px;
+        align-items: center;
+    }
+
+    /* Headings and intro text span full width */
+    #config-content h2,
+    #config-content p {
+        grid-column: 1 / -1;
+        margin-bottom: 6px;
+    }
+
+    /* Labels in first column, right-aligned */
+    #config-content label {
+        margin: 0;
+        text-align: right;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* Controls in second column, full width */
+    #config-content input,
+    #config-content select {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+    }
+
+    /* Helper text spans full width under its related fields */
+    #config-content small {
+        grid-column: 1 / -1;
+        margin: 6px 0 10px;
+    }
+
+    /* Action buttons in a single row aligned to the right */
+    #config-content .config-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 8px;
+    }
+
+    #config-content .config-actions button {
+        margin: 0;
+    }
 }

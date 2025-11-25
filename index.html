@@ -43,9 +43,11 @@
                 <small style="display:block; color:#666; margin:6px 0 10px;">After you paste the CSV URL, the headers will auto-load and appear in the dropdowns above.</small>
                 <label for="qr-url" title="Paste the public link to your Google Form that attendees will fill out. The QR code points to this URL.">Question Submission URL:</label>
                 <input type="text" id="qr-url" placeholder="https://forms.google.com/..." title="Public Google Form URL for submitting questions. The QR code uses this link.">
-                <button id="save-config">Save</button>
-                <button id="cancel-config">Cancel</button>
-                <button id="clear-done">Clear All Marked Done</button>
+                <div class="config-actions">
+                    <button id="save-config">Save</button>
+                    <button id="cancel-config">Cancel</button>
+                    <button id="clear-done">Clear All Marked Done</button>
+                </div>
             </div>
         </div>
     <div id="qr-code" class="qr-hidden">
