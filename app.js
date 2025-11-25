@@ -51,6 +51,7 @@ function saveConfig() {
     }
     const pollEl = document.getElementById('poll-interval');
     const qrEl = document.getElementById('qr-url');
+    const oldUrl = (config.sheetUrl || '').trim();
     config.sheetUrl = url;
     config.pollInterval = Math.max(
         5,
@@ -73,6 +74,10 @@ function saveConfig() {
     console.log('Config saved:', config);
     updateQRCode();
     hideConfigModal();
+    if (oldUrl !== config.sheetUrl) {
+        clearColumnMapping();
+        clearQuestionsDisplay();
+    }
     startPolling();
 }
 
@@ -198,6 +203,33 @@ function parseCSV(csvText) {
             questions.push({ name, question });
         }
     }
+}
+
+function clearColumnMapping() {
+    config.nameColumn = '';
+    config.questionColumn = '';
+    const nameSel = document.getElementById('name-column');
+    const questionSel = document.getElementById('question-column');
+    if (nameSel) {
+        nameSel.innerHTML = '';
+        nameSel.value = '';
+    }
+    if (questionSel) {
+        questionSel.innerHTML = '';
+        questionSel.value = '';
+    }
+}
+
+/**
+ * Clear all currently loaded questions and reset UI.
+ * Used when the source CSV URL changes or is removed.
+ */
+function clearQuestionsDisplay() {
+    questions = [];
+    activeIndices = [];
+    currentActiveIndex = -1;
+    const container = document.getElementById('questions-container');
+    if (container) container.innerHTML = '';
 }
 
 // Display questions
@@ -359,6 +391,10 @@ let pollTimer;
 
 function startPolling() {
     clearInterval(pollTimer);
+    if (!config.sheetUrl) {
+        // No source configured: ensure UI shows no stale questions and stop polling
+        return;
+    }
     fetchQuestions();
     pollTimer = setInterval(fetchQuestions, config.pollInterval * 1000);
 }
@@ -452,8 +488,22 @@ window.addEventListener('DOMContentLoaded', () => {
     // When the sheet URL changes or loses focus, try to load headers
     const sheetUrlInput = document.getElementById('sheet-url');
     if (sheetUrlInput) {
-        sheetUrlInput.addEventListener('change', fetchHeadersAndPopulate);
-        sheetUrlInput.addEventListener('blur', fetchHeadersAndPopulate);
+        sheetUrlInput.addEventListener('change', () => {
+            const newUrl = (sheetUrlInput.value || '').trim();
+            if (!newUrl || newUrl !== (config.sheetUrl || '').trim()) {
+                clearColumnMapping();
+                clearQuestionsDisplay();
+            }
+            fetchHeadersAndPopulate();
+        });
+        sheetUrlInput.addEventListener('blur', () => {
+            const newUrl = (sheetUrlInput.value || '').trim();
+            if (!newUrl || newUrl !== (config.sheetUrl || '').trim()) {
+                clearColumnMapping();
+                clearQuestionsDisplay();
+            }
+            fetchHeadersAndPopulate();
+        });
     }
     document.getElementById('cancel-config').addEventListener('click', hideConfigModal);
     document.getElementById('clear-done').addEventListener('click', clearDone);
